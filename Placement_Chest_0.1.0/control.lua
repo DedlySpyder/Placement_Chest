@@ -74,17 +74,7 @@ function onTick(event)
 					local force = chestEntity.force
 					local surface = chestEntity.surface
 					
-					--For placing blueprints
-					if (item == "blueprint") then
-						for index=1,#inventory,1 do
-							local blueprint = inventory[index]
-							debugLog("Found blueprint")
-							if blueprint.is_blueprint_setup then
-								debugLog("Blueprint is set up") -- TODO - Find adjustment and place it
-								return
-							end
-						end
-					end
+					
 					
 					local entityPrototype = game.get_item_prototype(item).place_result
 					if (entityPrototype ~= nil) then
