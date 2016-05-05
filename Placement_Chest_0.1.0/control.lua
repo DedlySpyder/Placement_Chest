@@ -13,13 +13,13 @@ function entityBuilt(event)
 		local positionX = entity.position.x
 		local positionY = entity.position.y
 		local placementPosition
-		if (place_direction == "down") then
+		if (place_direction == "south") then
 			placementPosition = {x = positionX, y = positionY+1}
-		elseif (place_direction == "left") then
+		elseif (place_direction == "west") then
 			placementPosition = {x = positionX-1, y = positionY}
-		elseif (place_direction == "right") then
+		elseif (place_direction == "east") then
 			placementPosition = {x = positionX+1, y = positionY}
-		elseif (place_direction == "up") then
+		elseif (place_direction == "north") then
 			placementPosition = {x = positionX, y = positionY-1}
 		end
 		table.insert(global.placementChest, {entity=entity, placementPosition=placementPosition}) --entity=nil, placementPosition=nil
@@ -68,16 +68,34 @@ function onTick(event)
 			local chestEntity = currentChest.entity
 			if chestEntity.has_items_inside() then
 				debugLog("Contains something")
-				for item, _ in pairs(chestEntity.get_inventory(defines.inventory.chest).get_contents()) do
+				local inventory = chestEntity.get_inventory(defines.inventory.chest)
+				for item, _ in pairs(inventory.get_contents()) do
 					debugLog("Can place?:"..item)
 					local force = chestEntity.force
 					local surface = chestEntity.surface
+					
+					--For placing blueprints
+					if (item == "blueprint") then
+						for index=1,#inventory,1 do
+							local blueprint = inventory[index]
+							debugLog("Found blueprint")
+							if blueprint.is_blueprint_setup then
+								debugLog("Blueprint is set up") -- TODO - Find adjustment and place it
+								return
+							end
+						end
+					end
 					
 					local entityPrototype = game.get_item_prototype(item).place_result
 					if (entityPrototype ~= nil) then
 						local placedEntityPosition = getPlacedEntityPosition(entityPrototype, currentChest.placementPosition)
 						if surface.can_place_entity{name=item, position=placedEntityPosition, force=force} then
-							surface.create_entity{name=item, position=placedEntityPosition, force=force}
+							local createdEntity = surface.create_entity{name=item, position=placedEntityPosition, force=force}
+							
+							if (createdEntity.name == "avatar") then
+								remote.call("Avatars_avatar_placement", "addAvatar", createdEntity)
+							end
+							
 							chestEntity.remove_item({name = item})
 							return
 						end
@@ -99,19 +117,19 @@ end
 
 function getPlacedEntityPosition(prototype, placementPosition)
 	local newPosition
-	if (place_direction == "down") then
+	if (place_direction == "south") then
 		local adjustment = math.floor(math.abs(prototype.collision_box.left_top.y))
 		newPosition = {placementPosition.x, placementPosition.y+adjustment}
 		return newPosition
-	elseif (place_direction == "left") then
+	elseif (place_direction == "west") then
 		local adjustment = math.floor(math.abs(prototype.collision_box.right_bottom.x))
 		newPosition = {placementPosition.x-adjustment, placementPosition.y}
 		return newPosition
-	elseif (place_direction == "right") then
+	elseif (place_direction == "east") then
 		local adjustment = math.floor(math.abs(prototype.collision_box.right_bottom.x))
 		newPosition = {placementPosition.x+adjustment, placementPosition.y}
 		return newPosition
-	elseif (place_direction == "up") then
+	elseif (place_direction == "north") then
 		local adjustment = math.floor(math.abs(prototype.collision_box.left_top.y))
 		newPosition = {placementPosition.x, placementPosition.y-adjustment}
 		return newPosition
