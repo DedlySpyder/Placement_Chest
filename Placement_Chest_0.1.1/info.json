@@ -1,0 +1,10 @@
+{
+  "name": "Placement_Chest",
+  "version": "0.1.1",
+  "title": "Placement Chest",
+  "author": "DedlySpyder",
+  "contact": "DedlySpyder@gmail.com",
+  "homepage": "",
+  "description": "Allows for creation of a chest that places an entity from inside the chest at specific intervals.",
+  "dependencies": ["base", "? Avatars >= 0.2.2"]
+}
