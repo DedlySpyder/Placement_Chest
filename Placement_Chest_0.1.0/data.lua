@@ -1,0 +1,6 @@
+--require("")
+require("config")
+require("prototypes.entity")
+require("prototypes.item")
+require("prototypes.technology")
+require("prototypes.recipe")
